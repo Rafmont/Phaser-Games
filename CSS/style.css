@@ -1,0 +1,29 @@
+header { display:block; margin-bottom: 1px;}
+nav { display:block; width:20%; float: left;}
+section { display: block; width: 77%; float:right;}
+body {
+    background-color: #afebf7;
+    font-family: 'Sedgwick Ave', cursive;
+    text-align: justify;
+}
+
+.titulo {
+    text-align: center;
+    margin-top: -9%;
+    margin-bottom: 2%;
+    font-size: 48px;
+}
+
+nav {
+    font-size: 28px;
+}
+
+section {
+    font-size: 28px;
+}
+
+.imagem {
+    float: right;
+    padding: 10px;
+    margin-top: -5%;
+}

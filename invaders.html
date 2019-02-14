@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>DW1 Phaser</title>
+        <link rel="stylesheet" href="CSS/style.css" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Sedgwick+Ave" rel="stylesheet">
+        <script src="JS/phaser.min.js"></script>
+    </head>
+    <body>
+        <header>
+            <a href="index.html"><img src="IMG/phaser-logo.png" alt="logo Phaser"></a>
+            <h1 class="titulo">Invaders</h1>
+        </header>
+        <nav>
+            <h3 style="text-align: center"><a href="index.html">Inicio</a></h3>
+            <ul>
+                <li><a href="CatchUp.html">CatchUp!</a></li>
+                <li><a href="invaders.html">Invaders</a></li>
+            </ul>
+        </nav>
+            <section style="text-align: center">
+                <script lang="javascript">
+                //Criação da variavel "game" que representa o jogo, onde serão adicionados os elementos.
+                var game = new Phaser.Game(800,600,Phaser.AUTO, 'invaders', { preload: preload, create: create, update: update });
+                var player;
+                var tiros;
+                var tiro;
+                var aliens;
+                var alien;
+                var tempoTiro = 0;
+                var tirosE;
+                var tiroE;
+                var tempoTiroE = 0;
+                var inimigosVivos = [];
+                var explosion;
+                var pontuacao = 0;
+                var texto;
+
+                function preload() {
+                    game.load.image('background', 'IMG/space-background.jpg');
+                    game.load.image('starship', 'IMG/starship.png');
+                    game.load.image('tiro', 'IMG/tiro.png');
+                    game.load.image('alien', 'IMG/alien.png');
+                    game.load.audio('fire', 'SOUND/FIRE.wav');
+                    game.load.audio('bgm', 'SOUND/BGM2.mp3');
+                    game.load.image('tiroE', 'IMG/TiroInimigo.png');
+                    game.load.audio('fireE', 'SOUND/FIRE_E.wav');
+                    game.load.audio('explosion', 'SOUND/EXPLOSION.wav');
+
+                }
+
+                function create() {
+                    game.physics.startSystem(Phaser.Physics.ARCADE);
+                    
+                    var bgm = game.add.audio('bgm');
+                    bgm.play();
+                    
+                    explosion = game.add.audio('explosion');
+                    
+                    var background = game.add.image(0,0, 'background');
+                    
+                    player = game.add.sprite(game.world.centerX-35,525,'starship');
+                    game.physics.enable(player, Phaser.Physics.ARCADE);
+                    player.scale.setTo(0.25, 0.25);
+                    player.body.collideWorldBounds = true;
+
+                    tiros = game.add.group();
+                    tiros.enableBody = true;
+                    tiros.createMultiple(20, 'tiro');
+                    tiros.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', resetTiro);
+                    tiros.callAll('anchor.setTo', 'anchor', 0.5, 1.0);
+                    tiros.setAll('checkWorldBounds', true);
+                    
+                    tirosE = game.add.group();
+                    tirosE.enableBody = true;
+                    tirosE.createMultiple(80, 'tiroE');
+                    tirosE.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', resetTiro);
+                    tirosE.callAll('anchor.setTo', 'anchor', 0.5, 1.0);
+                    tirosE.setAll('checkWorldBounds', true);
+
+                    aliens = game.add.group();
+                    aliens.enableBody = true;
+                    for (var i = 0; i < 4; i++) {
+                        for (var j = 0; j < 10; j++) {
+                            alien = aliens.create((j * 48) + 50, i * 50, 'alien');
+                            alien.body.moves = false;
+                            alien.scale.setTo(0.1, 0.1);
+                        }
+                    }
+                    
+                    var tween = game.add.tween(aliens).to( { x: 150 }, 1000, Phaser.Easing.Linear.None, true, 0, 1000, true);
+                    tween.onLoop.add(descer, this);
+                    
+                    texto = game.add.text(0, 0, "Pontos: " + pontuacao, {
+                        font: "28px Arial",
+                        fill: "#f4d942",
+                        align: "left"
+                    });
+
+
+                }
+                
+                function descer() {
+                    aliens.y += 10;
+                }
+
+                function resetTiro(tiro) {
+                    tiro.kill();
+                }
+
+                function update() {
+                    if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
+                        player.x -= 3;
+                    }
+                    if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
+                        player.x += 3;
+                    }
+                    if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
+                        if (game.time.now > tempoTiro) {
+                           tiro = tiros.getFirstExists(false);                      
+                           var fire = game.add.audio('fire');
+
+                            if (tiro) {
+                                fire.play();
+                                tiro.reset(player.x +30, player.y);
+                                tiro.body.velocity.y = -500;
+                                tempoTiro = game.time.now + 200;
+                            }
+                        }
+                        
+                    }
+                    
+                    if (game.time.now > tempoTiroE) {
+                        atirar();
+                    }
+                    tiroE = tirosE.getFirstExists(false);
+                    game.physics.arcade.overlap(tiros, aliens, Colision_Alien, null, this);
+                    game.physics.arcade.overlap(tirosE, player, Colision_Player, null, this);
+                    
+                    texto.setText("Pontos: " + pontuacao);
+                }
+                
+                function atirar() {
+                    tiroE = tirosE.getFirstExists(false);
+                    inimigosVivos.length=0;
+                    
+                    aliens.forEachAlive(function(alien){
+                        inimigosVivos.push(alien);
+                    });
+                    
+                    if (tiroE && inimigosVivos.length > 0 && player.alive == true) {
+                        var random=game.rnd.integerInRange(0,inimigosVivos.length-1);
+                        var shooter=inimigosVivos[random];
+                        tiroE.reset(shooter.body.x, shooter.body.y);
+                        game.physics.arcade.moveToObject(tiroE,player,120);
+                        tempoTiroE = game.time.now + 600;
+                        var somtiro = game.add.audio('fireE');
+                        somtiro.play();
+                    }
+                }
+                
+                function Colision_Alien(tiro, alien) {
+                    tiro.kill();
+                    alien.kill();
+                    explosion.play();
+                    pontuacao = pontuacao + 20;
+                }
+                
+                function Colision_Player(player, tiroE) {
+                    tiroE.kill();
+                    player.kill();
+                    explosion.play();
+                }
+            </script>
+        </section>
+    </body>
+</html>

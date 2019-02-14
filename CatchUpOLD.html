@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>DW1 Phaser</title>
+        <link rel="stylesheet" href="CSS/style.css" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Sedgwick+Ave" rel="stylesheet">
+        <!-- "Importação da biblioteca do Phaser JS -->
+        <script src="JS/phaser.min.js"></script>
+    </head>
+    <body>
+        <header>
+            <a href="index.html"><img src="IMG/phaser-logo.png" alt="logo Phaser"></a>
+            <h1 class="titulo">CatchUP!</h1>
+        </header>
+        <nav>
+            <h3 style="text-align: center"><a href="index.html">Inicio</a></h3>
+            <ul>
+                <li><a href="CatchUp.html">CatchUp!</a></li>
+                <li><a href="invaders.html">Invaders</a></li>
+            </ul>
+        </nav>
+        <section style="text-align: center">
+            <script lang="javascript">
+                //Criação da variavel "game" que representa o jogo, onde serão adicionados os elementos.
+                var game = new Phaser.Game(800,600,Phaser.AUTO, 'phaser-example', { preload: preload, create: create, update: update });
+                var barra;
+                var pedra = new Array();
+                var delay = 1;
+                var pontuacao = 0;
+                var texto;
+                var musica;
+                var sucesso;
+                var falha;
+
+                function preload() {
+                    //Pré-carrega as imagens e tamanho do plano de jogo.
+                    game.load.image('pedra', 'IMG/pedra.png');
+                    game.load.image('background', 'IMG/background.jpg');
+                    game.load.image('barra', 'IMG/barra.png');
+                    game.world.setBounds(0,0,800, 600);
+
+                    //Adição dos sons utilizados, BGM, SUCCESS e FAIL.
+                    game.load.audio('BGM', 'SOUND/BGM.mp3');
+                    game.load.audio('SUCCESS', 'SOUND/SUCCESS.mp3');
+                    game.load.audio('FAIL', 'SOUND/FAIL.wav');
+
+                }
+
+                function create() {
+                    game.physics.startSystem(Phaser.Physics.ARCADE);
+
+                    //Adiciona a imagem de background do jogo, iniciando em x = 0 e y = 0.
+                    var background = game.add.image(0,0, 'background');
+
+                    //Adição da barra que o jogador tem controle.
+                    barra = game.add.image(0, 540, 'barra');
+                    barra.scale.setTo(0.20,0.20);
+
+                    //Adição dos sons e inicio da BGM.
+                    musica = game.add.audio('BGM');
+                    sucesso = game.add.audio('SUCCESS');
+                    falha = game.add.audio('FAIL');
+                    musica.play();
+                    //Adição do texto de pontuação, onde existe a definição da fonte.
+                    texto = game.add.text(0, 0, "Pontos: " + pontuacao, {
+                        font: "35px Arial",
+                        fill: "#f4d942",
+                        align: "left"
+                    });
+
+                }
+
+                function update() {
+
+                    //Condições para verificar se as teclas de esquerda e direita estão pressionadas, para assim mover a barra.
+                    if (game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
+                        barra.x -= 8;
+                    }
+                    if (game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
+                        barra.x += 8;
+                    }
+
+                    //Condição para adicionar um "delay" a geração das pedras.
+                    if(delay == 0) {
+                        //Recupera o tamanho do array de pedras, onde o tamanho sempre será o próximo elemento.
+                        var i = pedra.length;
+                        pedra[i] = game.add.sprite((Math.random() * 800), 0, 'pedra');
+                        pedra[i].scale.setTo(0.25,0.25);
+                        game.physics.enable(pedra[i],Phaser.Physics.ARCADE);
+
+                        delay = 250;
+                    } else {
+                        delay--;
+                    }
+
+                    //Adicição de "gravidade".
+                    for (j=0;j<pedra.length;j++){
+                        pedra[j].body.gravity.y = 150;
+                        //Condição para verificar se a pedra está em cima da barra.
+                        if (pedra[j].x >= barra.x && pedra[j].x <= barra.x + 260 && pedra[j].y >= 540-60) {
+                            addPontos();
+                            sucesso.play()
+                            pedra[j].destroy();
+                            pedra.splice(j,1);
+                        //Caso contrário, verifica-se a pedra passou da barra não estando em cima dela.
+                        } else {
+                            if (pedra[j].y >= 540){
+                                pedra[j].destroy();
+                                falha.play();
+                                pedra.splice(j,1);
+                                pontuacao = 0;
+                            }
+                        }
+                    }
+
+                    //Atualização dos pontos.
+                    texto.setText("Pontos: " + pontuacao);
+
+                }
+
+                function addPontos() {
+                    pontuacao++;
+
+                }
+            </script>
+        </section>
+    </body>
+</html>

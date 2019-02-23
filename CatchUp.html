@@ -150,7 +150,7 @@
                     pedra = pedras.getFirstExists(false);
                     if (pedra && dificuldade == 1) {
                         pedra.reset((Math.floor(Math.random() * 763)) , 10);
-                        pedra.body.velocity.y = +100;
+                        pedra.body.velocity.y = 100;
                         delay = game.time.now + 1500;
                         
                     } else if (pedra && dificuldade == 2){

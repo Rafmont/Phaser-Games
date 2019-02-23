@@ -66,7 +66,7 @@
                     pedras.callAll('events.onOutOfBounds.add', 'events.onOutOfBounds', resetPedra);
                     pedras.callAll('anchor.setTo', 'anchor', 0.5, 1.0);
                     pedras.setAll('checkWorldBounds', true);
-                    pedras.scale.setTo(0.25,0.25);
+                    //pedras.scale.setTo(0.25,0.25);
                     game.physics.enable(pedras, Phaser.Physics.ARCADE);
                     
                     
@@ -149,23 +149,23 @@
                 function criaPedras() {
                     pedra = pedras.getFirstExists(false);
                     if (pedra && dificuldade == 1) {
-                        pedra.reset((Math.random() * 3150) + 64 , 10);
-                        pedra.body.velocity.y = +500;
+                        pedra.reset((Math.random() * 3150), 10);
+                        pedra.body.velocity.y = +100;
                         delay = game.time.now + 1500;
                         
                     } else if (pedra && dificuldade == 2){
-                        pedra.reset((Math.random() * 3150) + 64 , 10);
-                        pedra.body.velocity.y = +600;
+                        pedra.reset((Math.random() * 3150), 10);
+                        pedra.body.velocity.y = +200;
                         delay = game.time.now + 1300;
                         
                     } else if (pedra && dificuldade == 3) {
-                        pedra.reset((Math.random() * 3150) + 64 , 10);
-                        pedra.body.velocity.y = +700;
+                        pedra.reset((Math.random() * 3150), 10);
+                        pedra.body.velocity.y = +300;
                         delay = game.time.now + 800;
                         
                     } else if (pedra && dificuldade == 4){
-                        pedra.reset((Math.random() * 3150) + 64 , 10);
-                        pedra.body.velocity.y = +800;
+                        pedra.reset((Math.random() * 3150), 10);
+                        pedra.body.velocity.y = +400;
                         delay = game.time.now + 600;
                         
                     }
